@@ -17,6 +17,17 @@ public class User {
     @Column(name="user_details")
     private String userDetails;
 
+    @OneToOne(mappedBy="user", cascade = CascadeType.ALL)
+    private Wallet wallet;
+
+    public Wallet getWallet() {
+        return wallet;
+    }
+
+    public void setWallet(Wallet wallet) {
+        this.wallet = wallet;
+    }
+
     public Integer getId() {
         return id;
     }

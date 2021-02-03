@@ -81,14 +81,19 @@ public class WalletService {
         gr.setStatus("FAILED");
         try {
             //checking if user is present
-
-            if (userRepository.findByPhoneNumber(phoneNo) !=null) {
-
-                User callUser=userRepository.findByPhoneNumber(phoneNo);
+            User callUser;
+            if ((callUser=userRepository.findByPhoneNumber(phoneNo)) !=null){
+                if((walletRepository.findByUserId(callUser.getId())!=null))
+                {
+                    gr.setMessage("Wallet already exists");
+                    logger.trace(" Non existing user");
+                    return gr;
+                }
+               // User callUser=userRepository.findByPhoneNumber(phoneNo);
 
                 //creating wallet with 0 balance
                 Wallet wallet = new Wallet();
-                wallet.setUserId(callUser.getId());
+                wallet.setUser(callUser);
                 wallet.setBalance(0);
                 walletRepository.save(wallet);
 
@@ -187,7 +192,19 @@ public class WalletService {
                     logger.trace("Transaction complete");
 
                     //make an entry in transaction table
-                    addTransactionSummary(user1,user2,amount);
+                    //addTransactionSummary(user1,user2,amount);
+                    java.util.Date date= new java.util.Date();
+                    Timestamp timestamp=new Timestamp(date.getTime());
+                    logger.trace("Adding transaction entry to table");
+                    Transaction transaction=new Transaction();
+                    transaction.setFromUser(user1);
+                    transaction.setToUser(user2);
+                    transaction.setAmount(amount);
+                    transaction.setStatus("SUCCESS");
+                    transaction.setTime(timestamp);
+                    transactionRepository.save(transaction);
+                    logger.trace("Transaction entry added to table");
+
                     return gr;
                 }
             }
@@ -232,7 +249,7 @@ public class WalletService {
             return gr;
         }
         else {
-            gr.setMessage("NOT SUCCESSFUL");
+            gr.setMessage("Transaction not happened yet");
             gr.setStatus("STATUS: FAILED");
             logger.trace(" Transaction has not occurred ");
             return gr;

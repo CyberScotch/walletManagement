@@ -10,10 +10,20 @@ public class Wallet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer walletId;
 
-    @Column(name="userid")
-    private Integer userId;
     @Column(name="balance")
     private Integer balance;
+
+    @OneToOne
+    @JoinColumn(referencedColumnName = "id")
+    private User user;
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 
     public Integer getWalletId() {
         return walletId;
@@ -21,14 +31,6 @@ public class Wallet {
 
     public void setWalletId(Integer walletId) {
         this.walletId = walletId;
-    }
-
-    public Integer getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Integer userId) {
-        this.userId = userId;
     }
 
     public Integer getBalance() {
