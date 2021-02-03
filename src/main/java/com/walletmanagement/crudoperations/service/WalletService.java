@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.xml.ws.ServiceMode;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -32,6 +33,9 @@ public class WalletService {
     WalletRepository walletRepository;
     @Autowired
     TransactionRepository transactionRepository;
+
+    //page variable
+    private static final Integer PAGE_NO=2;
 
     //For adding log traces
     Logger logger= LoggerFactory.getLogger(WalletService.class);
@@ -256,15 +260,25 @@ public class WalletService {
         }
     }
 
-    public Page<Transaction> getSummary(Integer userId) {
+    public List<Transaction> getSummary(Integer userId, Integer pageNo) {
 
-        Page<Transaction> transactionPages;
+        //Page<Transaction> transactionPages;
         Optional<User> temp = userRepository.findById(userId);
         if (temp.isPresent()) {
             User callUser = temp.get();
             String phoneNumber = callUser.getPhoneNumber();
-                transactionPages=transactionRepository.findByFromUser(phoneNumber,PageRequest.of(1,3));
-                return transactionPages;
+            logger.trace("User Present");
+                //transactionPages=transactionRepository.findByFromUser(phoneNumber,PageRequest.of(1,3));
+                //return transactionPages;
+            List<Transaction> tr1,tr2;
+            tr1=transactionRepository.findByFromUser(phoneNumber,PageRequest.of(pageNo,PAGE_NO/2));
+            tr2=transactionRepository.findByToUser(phoneNumber,PageRequest.of(pageNo,PAGE_NO/2));
+            List<Transaction> tr3=new ArrayList<Transaction>();
+            tr3.addAll(tr1);
+            tr3.addAll(tr2);
+            logger.trace("Sending Transactions in Pages: Each page has at most 2 records");
+            return tr3;
+            //return transactionRepository.findByFromUserAndToUser(phoneNumber,phoneNumber,PageRequest.of(pageNo,PAGE_NO));
         }
         else
             return null;

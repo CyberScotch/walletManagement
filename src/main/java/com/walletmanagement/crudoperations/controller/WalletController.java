@@ -2,6 +2,7 @@ package com.walletmanagement.crudoperations.controller;
 
 import com.walletmanagement.crudoperations.model.GeneralResponse;
 import com.walletmanagement.crudoperations.model.Transaction;
+import com.walletmanagement.crudoperations.model.TransactionPageResponse;
 import com.walletmanagement.crudoperations.model.User;
 import com.walletmanagement.crudoperations.service.WalletService;
 import org.slf4j.Logger;
@@ -14,6 +15,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.xml.ws.Response;
+import java.util.List;
 
 
 @RestController
@@ -58,7 +62,11 @@ public class WalletController {
 
     //getting Transaction summary
     @RequestMapping(value = "/transaction", method = RequestMethod.GET)
-    public Page<Transaction> getTransactionSummary(@RequestParam(value="userId") Integer userId) {
-        return walletService.getSummary(userId);
+    public TransactionPageResponse getTransactionSummary(@RequestParam(value="userId") Integer userId, @RequestParam(value="pageNo",defaultValue = "0")Integer pageNo) {
+        List<Transaction> transactions= walletService.getSummary(userId,pageNo);
+        if(transactions==null)
+            return new TransactionPageResponse(null,-1);
+        else
+            return new TransactionPageResponse(transactions,pageNo + transactions.size());
     }
 }
